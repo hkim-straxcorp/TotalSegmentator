@@ -1,0 +1,6 @@
+boto3==1.28.72
+
+datadog-lambda==4.75.0
+numpy==1.26.0
+matplotlib==3.8.0
+nibabel==5.1.0

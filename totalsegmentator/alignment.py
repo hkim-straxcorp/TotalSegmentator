@@ -1,8 +1,5 @@
-import sys
 
-import numpy as np
 import nibabel as nib
-import nibabel.processing
 
 
 def as_closest_canonical(img_in):

@@ -8,13 +8,12 @@ import numpy as np
 import nibabel as nib
 import torch
 
-from totalsegmentator.statistics import get_basic_statistics, get_radiomics_features_for_entire_dir
+# from totalsegmentator.statistics import get_basic_statistics, get_radiomics_features_for_entire_dir
 from totalsegmentator.libs import download_pretrained_weights
 from totalsegmentator.config import setup_nnunet, setup_totalseg, increase_prediction_counter
 from totalsegmentator.config import send_usage_stats, set_license_number, has_valid_license_offline
 from totalsegmentator.config import get_config_key, set_config_key
 from totalsegmentator.map_to_binary import class_map
-from totalsegmentator.map_to_total import map_to_total
 
 
 def show_license_info():
@@ -93,7 +92,7 @@ def totalsegmentator(input, output, ml=False, nr_thr_resamp=1, nr_thr_saving=6,
             crop = None
             if not quiet: print("Using 'fastest' option: resampling to lower resolution (6mm)")
         else:
-            task_id = [291, 292, 293, 294, 295]
+            task_id = [294] # femur weights 294 [291, 292, 293, 294, 295]
             resample = 1.5
             trainer = "nnUNetTrainerNoMirroring"
             crop = None
@@ -325,23 +324,23 @@ def totalsegmentator(input, output, ml=False, nr_thr_resamp=1, nr_thr_saving=6,
                               "multilabel": ml, "roi_subset": roi_subset, 
                               "statistics": statistics, "radiomics": radiomics})
 
-    if statistics:
-        if not quiet: print("Calculating statistics...")
-        st = time.time()
-        stats_dir = output.parent if ml else output
-        get_basic_statistics(seg, ct_img, stats_dir / "statistics.json", quiet, task, statistics_exclude_masks_at_border)
-        # get_radiomics_features_for_entire_dir(input, output, output / "statistics_radiomics.json")
-        if not quiet: print(f"  calculated in {time.time()-st:.2f}s")
-
-    if radiomics:
-        if ml:
-            raise ValueError("Radiomics not supported for multilabel segmentation. Use without --ml option.")
-        if img_type == "dicom":
-            raise ValueError("Radiomics not supported for DICOM input. Use nifti input.")
-        if not quiet: print("Calculating radiomics...")  
-        st = time.time()
-        stats_dir = output.parent if ml else output
-        get_radiomics_features_for_entire_dir(input, output, stats_dir / "statistics_radiomics.json")
-        if not quiet: print(f"  calculated in {time.time()-st:.2f}s")
+    # if statistics:
+    #     if not quiet: print("Calculating statistics...")
+    #     st = time.time()
+    #     stats_dir = output.parent if ml else output
+    #     get_basic_statistics(seg, ct_img, stats_dir / "statistics.json", quiet, task, statistics_exclude_masks_at_border)
+    #     # get_radiomics_features_for_entire_dir(input, output, output / "statistics_radiomics.json")
+    #     if not quiet: print(f"  calculated in {time.time()-st:.2f}s")
+    #
+    # if radiomics:
+    #     if ml:
+    #         raise ValueError("Radiomics not supported for multilabel segmentation. Use without --ml option.")
+    #     if img_type == "dicom":
+    #         raise ValueError("Radiomics not supported for DICOM input. Use nifti input.")
+    #     if not quiet: print("Calculating radiomics...")
+    #     st = time.time()
+    #     stats_dir = output.parent if ml else output
+    #     get_radiomics_features_for_entire_dir(input, output, stats_dir / "statistics_radiomics.json")
+    #     if not quiet: print(f"  calculated in {time.time()-st:.2f}s")
 
     return seg_img

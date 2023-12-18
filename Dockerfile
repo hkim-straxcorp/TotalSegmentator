@@ -1,20 +1,20 @@
-FROM nvcr.io/nvidia/pytorch:23.05-py3
+FROM public.ecr.aws/lambda/python:3.11
 
-RUN apt-get update
-# Needed for fury vtk. ffmpeg also needed
-RUN apt-get install ffmpeg libsm6 libxext6 -y
-RUN apt-get install xvfb -y
+COPY requirements.txt ./
 
-RUN pip install --upgrade pip
+RUN yum -y update && yum -y install mesa-libGL git
+RUN python3.11 -m pip install -r requirements.txt
+RUN python3.11 -m pip uninstall dataclasses -y
 
-# installing pyradiomics results in an error in github actions
-# RUN pip pyradiomics
-
-COPY . /app
-RUN pip install /app
-
-RUN python /app/totalsegmentator/download_pretrained_weights.py
-
-# expose not needed if using -p
-# If using only expose and not -p then will not work
-# EXPOSE 80
+COPY utils/aws_s3 utils/aws_s3
+COPY utils/aws_sqs utils/aws_sqs
+COPY utils/logger utils/logger
+COPY utils/bucket_name_gen utils/bucket_name_gen
+COPY bmd_utils bmd_utils
+COPY lambda_function.py ${LAMBDA_TASK_ROOT}
+COPY --from=public.ecr.aws/datadog/lambda-extension:45 /opt/. /opt/
+COPY file_io.py ${LAMBDA_TASK_ROOT}
+COPY hip_roi.py ${LAMBDA_TASK_ROOT}
+COPY project.py ${LAMBDA_TASK_ROOT}
+COPY rotate.py ${LAMBDA_TASK_ROOT}
+CMD ["datadog_lambda.handler.handler"]

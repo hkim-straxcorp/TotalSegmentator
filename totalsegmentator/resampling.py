@@ -1,17 +1,13 @@
 # pylint: disable=relative-beyond-top-level
 
-import os
-import time
-import importlib
-
 import numpy as np
 import nibabel as nib
 from scipy import ndimage
 import psutil
 from joblib import Parallel, delayed
 
-cupy_available = importlib.util.find_spec("cupy") is not None
-cucim_available = importlib.util.find_spec("cucim") is not None
+cupy_available = None #importlib.util.find_spec("cupy") is not None
+cucim_available = None #importlib.util.find_spec("cucim") is not None
 
 
 def change_spacing_of_affine(affine, zoom=0.5):
@@ -56,24 +52,24 @@ def resample_img(img, zoom=0.5, order=0, nr_cpus=-1):
     return img_sm
 
 
-def resample_img_cucim(img, zoom=0.5, order=0, nr_cpus=-1):
-    """
-    Completely speedup of resampling compare to non-gpu version not as big, because much time is lost in 
-    loading the file and then in copying to the GPU.
-
-    For small image no significant speedup.
-    For large images reducing resampling time by over 50%.
-
-    On our slurm gpu cluster it is actually slower with cucim than without it.
-    """
-    import cupy as cp
-    from cucim.skimage.transform import resize
-
-    img = cp.asarray(img)  # slow
-    new_shape = (np.array(img.shape) * zoom).round().astype(np.int32)
-    resampled_img = resize(img, output_shape=new_shape, order=order, mode="edge", anti_aliasing=False)  # very fast
-    resampled_img = cp.asnumpy(resampled_img)  # Alternative: img_arr = cp.float32(resampled_img.get())   # very fast
-    return resampled_img
+# def resample_img_cucim(img, zoom=0.5, order=0, nr_cpus=-1):
+#     """
+#     Completely speedup of resampling compare to non-gpu version not as big, because much time is lost in
+#     loading the file and then in copying to the GPU.
+#
+#     For small image no significant speedup.
+#     For large images reducing resampling time by over 50%.
+#
+#     On our slurm gpu cluster it is actually slower with cucim than without it.
+#     """
+#     import cupy as cp
+#     from cucim.skimage.transform import resize
+#
+#     img = cp.asarray(img)  # slow
+#     new_shape = (np.array(img.shape) * zoom).round().astype(np.int32)
+#     resampled_img = resize(img, output_shape=new_shape, order=order, mode="edge", anti_aliasing=False)  # very fast
+#     resampled_img = cp.asnumpy(resampled_img)  # Alternative: img_arr = cp.float32(resampled_img.get())   # very fast
+#     return resampled_img
 
 
 def resample_img_nnunet(data, mask=None, original_spacing=1.0, target_spacing=2.0):
@@ -195,7 +191,8 @@ def change_spacing(img_in, new_spacing=1.25, target_shape=None, order=0, nr_cpus
         new_data, _ = resample_img_nnunet(data, None, img_spacing, new_spacing)
     else:
         if cupy_available and cucim_available:
-            new_data = resample_img_cucim(data, zoom=zoom, order=order, nr_cpus=nr_cpus)  # gpu resampling
+            pass
+            # new_data = resample_img_cucim(data, zoom=zoom, order=order, nr_cpus=nr_cpus)  # gpu resampling
         else:
             new_data = resample_img(data, zoom=zoom, order=order, nr_cpus=nr_cpus)  # cpu resampling
         
