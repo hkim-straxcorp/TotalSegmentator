@@ -1,5 +1,5 @@
 boto3==1.28.72
-
+git+https://github.com/hkim-straxcorp/TotalSegmentator.git
 datadog-lambda==4.75.0
 numpy==1.26.0
 matplotlib==3.8.0

@@ -27,7 +27,7 @@ from totalsegmentator.map_to_binary import class_map, class_map_5_parts, map_tas
 from totalsegmentator.alignment import as_closest_canonical, undo_canonical
 from totalsegmentator.resampling import change_spacing
 from totalsegmentator.libs import combine_masks, compress_nifti, check_if_shape_and_affine_identical, reorder_multilabel_like_v1
-from totalsegmentator.dicom_io import dcm_to_nifti, save_mask_as_rtstruct
+from totalsegmentator.dicom_io import dcm_to_nifti #, save_mask_as_rtstruct
 
 from totalsegmentator.cropping import crop_to_mask, undo_crop
 from totalsegmentator.postprocessing import remove_outside_of_mask, extract_skin, remove_auxiliary_labels
@@ -484,7 +484,8 @@ def nnUNet_predict_image(file_in, file_out, task_id, model="3d_fullres", folds=N
 
             if output_type == "dicom":
                 file_out.mkdir(exist_ok=True, parents=True)
-                save_mask_as_rtstruct(img_data, selected_classes, file_in_dcm, file_out / "segmentations.dcm")
+                pass
+                # save_mask_as_rtstruct(img_data, selected_classes, file_in_dcm, file_out / "segmentations.dcm")
             else:
                 # Copy header to make output header exactly the same as input. But change dtype otherwise it will be 
                 # float or int and therefore the masks will need a lot more space.
