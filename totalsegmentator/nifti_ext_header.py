@@ -54,19 +54,19 @@ def save_multilabel_nifti(img, output_path, label_map, nora_project=None):
     if nora_project is not None:
         subprocess.call(f"/opt/nora/src/node/nora -p {nora_project} --add {str(output_path)} --addtag atlas", shell=True)
 
-
-def load_multilabel_nifti(img_path):
-    """
-    img_path: path to the image
-    returns:
-        img: nifti image
-        label_map: a dictionary with label ids and names
-    """
-    import xmltodict
-    img = nib.load(img_path)
-    ext_header = img.header.extensions[0].get_content()
-    ext_header = xmltodict.parse(ext_header)
-    ext_header = ext_header["CaretExtension"]["VolumeInformation"]["LabelTable"]["Label"]
-    label_map = {int(e["@Key"]): e["#text"] for e in ext_header}
-    return img, label_map
-
+#
+# def load_multilabel_nifti(img_path):
+#     """
+#     img_path: path to the image
+#     returns:
+#         img: nifti image
+#         label_map: a dictionary with label ids and names
+#     """
+#     import xmltodict
+#     img = nib.load(img_path)
+#     ext_header = img.header.extensions[0].get_content()
+#     ext_header = xmltodict.parse(ext_header)
+#     ext_header = ext_header["CaretExtension"]["VolumeInformation"]["LabelTable"]["Label"]
+#     label_map = {int(e["@Key"]): e["#text"] for e in ext_header}
+#     return img, label_map
+#

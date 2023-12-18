@@ -1,9 +1,6 @@
 import os
 import sys
-import random
-import string
 import time
-import platform
 import shutil
 import subprocess
 from pathlib import Path
@@ -12,7 +9,7 @@ import numpy as np
 import nibabel as nib
 from functools import partial
 from p_tqdm import p_map
-from multiprocessing import Pool
+
 import tempfile
 import torch
 
@@ -27,12 +24,11 @@ with nostdout():
 from nnunetv2.utilities.file_path_utilities import get_output_folder
 
 from totalsegmentator.map_to_binary import class_map, class_map_5_parts, map_taskid_to_partname
-from totalsegmentator.alignment import as_closest_canonical_nifti, undo_canonical_nifti
 from totalsegmentator.alignment import as_closest_canonical, undo_canonical
 from totalsegmentator.resampling import change_spacing
 from totalsegmentator.libs import combine_masks, compress_nifti, check_if_shape_and_affine_identical, reorder_multilabel_like_v1
 from totalsegmentator.dicom_io import dcm_to_nifti, save_mask_as_rtstruct
-from totalsegmentator.cropping import crop_to_mask_nifti, undo_crop_nifti
+
 from totalsegmentator.cropping import crop_to_mask, undo_crop
 from totalsegmentator.postprocessing import remove_outside_of_mask, extract_skin, remove_auxiliary_labels
 from totalsegmentator.postprocessing import keep_largest_blob_multilabel, remove_small_blobs_multilabel
@@ -429,16 +425,16 @@ def nnUNet_predict_image(file_in, file_out, task_id, model="3d_fullres", folds=N
                                                         interval=[size_thr_mm3, 1e10], debug=False)
             img_pred = nib.Nifti1Image(img_pred_pp, img_pred.affine)
 
-        if preview:
-            from totalsegmentator.preview import generate_preview
-            # Generate preview before upsampling so it is faster and still in canonical space 
-            # for better orientation.
-            if not quiet: print("Generating preview...")
-            st = time.time()
-            smoothing = 20
-            preview_dir = file_out.parent if multilabel_image else file_out
-            generate_preview(img_in_rsp, preview_dir / f"preview_{task_name}.png", img_pred.get_fdata(), smoothing, task_name)
-            if not quiet: print("  Generated in {:.2f}s".format(time.time() - st))
+        # if preview:
+        #     from totalsegmentator.preview import generate_preview
+        #     # Generate preview before upsampling so it is faster and still in canonical space
+        #     # for better orientation.
+        #     if not quiet: print("Generating preview...")
+        #     st = time.time()
+        #     smoothing = 20
+        #     preview_dir = file_out.parent if multilabel_image else file_out
+        #     generate_preview(img_in_rsp, preview_dir / f"preview_{task_name}.png", img_pred.get_fdata(), smoothing, task_name)
+        #     if not quiet: print("  Generated in {:.2f}s".format(time.time() - st))
 
         # Statistics calculated on the 3mm downsampled image are very similar to statistics
         # calculated on the original image. Volume often completely identical. For intensity

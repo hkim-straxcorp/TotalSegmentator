@@ -1,15 +1,14 @@
 import os
-import sys
-import time
+
 import shutil
 import zipfile
-from pathlib import Path
+
 import subprocess
 import platform
 
 from tqdm import tqdm
 import numpy as np
-import nibabel as nib
+
 import dicom2nifti
 
 from totalsegmentator.config import get_weights_dir
